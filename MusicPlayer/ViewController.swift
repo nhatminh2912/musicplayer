@@ -15,33 +15,42 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     
     var playing = false
     
-    var switchOn = true
-    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         audio = try! AVAudioPlayer(contentsOf: NSURL(fileURLWithPath: Bundle.main.path(forResource: "music", ofType: ".mp3")!) as URL)
+        
         audio.prepareToPlay()
+        
         audio.currentTime = 0
+        
         addThumbImgForSlider()
+        
         playandpause()
+        
         audio.numberOfLoops = -1
+        
         audio.delegate = self
+        
         duration_sld.maximumValue = Float(audio.duration)
-        var sliderr = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateSlider), userInfo: nil, repeats: true)
         
+        Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateSlider), userInfo: nil, repeats: true)
         
-        var timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateTimeLeft), userInfo: nil, repeats: true)
-        }
+        Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateTimeLeft), userInfo: nil, repeats: true)
+        
+        convertTime(Float(audio.duration), self.timetotal_lbl)
+        
+    }
     @IBOutlet weak var duration_sld: UISlider!
     
     @IBOutlet weak var timetotal_lbl: UILabel!
-
+    
     @IBOutlet weak var timeplayed_lbl: UILabel!
     
     @IBOutlet weak var play_btn: UIButton!
-
+    
     @IBOutlet weak var volume_sld: UISlider!
-
+    
     @IBAction func play_action(_ sender: UIButton)
     {
         
@@ -74,7 +83,6 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     
     @IBAction func repeat_action(_ sender: UISwitch)
     {
-        switchOn = sender.isOn
         
         if sender.isOn
         {
@@ -82,7 +90,6 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
         }
         else
         {
-            switchOn = false
             audio.numberOfLoops = 0
         }
     }
@@ -93,12 +100,39 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
         duration_sld.value = Float(audio.currentTime)
     }
     
+    func convertTime(_ time: Float,_ lbl: UILabel)
+    {
+        
+        let phut: Int = Int(time / 60)
+        let giay: Int = Int(time.truncatingRemainder(dividingBy: 60))
+        
+        if (phut < 10 && giay < 10)
+        {
+            lbl.text = "0\(phut):0\(giay)"
+        }
+        else
+        {
+            if giay < 10
+            {
+                lbl.text = "\(phut):0\(giay)"
+            }
+            else if phut < 10
+            {
+                lbl.text = "0\(phut):\(giay)"
+            }
+            else
+            {
+                lbl.text = "\(phut):\(giay)"
+            }
+        }
+        
+    }
     
     func updateTimeLeft()
     {
         
-        self.timetotal_lbl.text = String(format: "%2.2f", audio.duration / 60)
-        self.timeplayed_lbl.text = String(format: "%2.2f", audio.currentTime / 60)
+        convertTime(Float(audio.currentTime),timeplayed_lbl)
+        
     }
     
     func playandpause()
@@ -122,20 +156,22 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool)
     {
         
-        if switchOn == false
-        {
-
-            play_btn.setImage(UIImage(named: "play.png"), for: .normal)
-            
-        }
+        
+        play_btn.setImage(UIImage(named: "play.png"), for: .normal)
+        playing = !playing
+        
         
     }
     
     func addThumbImgForSlider()
     {
+        
+        duration_sld.setThumbImage(UIImage(named: "duration.png"), for: .normal)
+        
         volume_sld.setThumbImage(UIImage(named: "thumb.png"), for: .normal)
         
         volume_sld.setThumbImage(UIImage(named: "thumbHightLight.png"), for: .highlighted)
+        
     }
 }
 
